@@ -96,12 +96,16 @@ const createPictureElement = (picture) => {
   return pictureElement;
 };
 
-const renderPictures = (pictures) => {
+const renderPictures = (pictures, onPictureClick) => {
   const container = document.querySelector('.pictures');
   const fragment = document.createDocumentFragment();
 
   pictures.forEach((picture) => {
-    fragment.appendChild(createPictureElement(picture));
+    const element = createPictureElement(picture);
+    element.addEventListener('click', () => {
+      onPictureClick(picture);
+    });
+    fragment.appendChild(element);
   });
 
   container.appendChild(fragment);

@@ -1,9 +1,10 @@
 import { descriptions } from './data.js';
 import { getRandomInt, getRandomItem, createComment } from './util.js';
 import { PICTURES_COUNT, createPictures, renderPictures } from './pictures.js';
+import { openBigPicture } from './big-picture.js';
 
 const pictures = createPictures(PICTURES_COUNT);
-renderPictures(pictures);
+renderPictures(pictures, openBigPicture);
 
 export const generatePhotos = () => {
   const photos = [];

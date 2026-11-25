@@ -1,3 +1,5 @@
+const COMMENTS_STEP = 5;
+
 const bigPicture = document.querySelector('.big-picture');
 const bigPictureImg = bigPicture.querySelector('.big-picture__img img');
 const likesCount = bigPicture.querySelector('.likes-count');
@@ -7,6 +9,9 @@ const socialCaption = bigPicture.querySelector('.social__caption');
 const commentCount = bigPicture.querySelector('.social__comment-count');
 const commentsLoader = bigPicture.querySelector('.comments-loader');
 const closeButton = bigPicture.querySelector('.big-picture__cancel');
+
+let shownComments = 0;
+let currentComments = [];
 
 const createCommentElement = (comment) => {
   const li = document.createElement('li');
@@ -29,13 +34,31 @@ const createCommentElement = (comment) => {
   return li;
 };
 
-const renderComments = (comments) => {
-  socialComments.innerHTML = '';
+const updateCommentCount = () => {
+  commentCount.textContent = `${shownComments} из ${currentComments.length} комментариев`;
+};
+
+const renderNextComments = () => {
   const fragment = document.createDocumentFragment();
-  comments.forEach((comment) => {
+  const nextComments = currentComments.slice(shownComments, shownComments + COMMENTS_STEP);
+
+  nextComments.forEach((comment) => {
     fragment.appendChild(createCommentElement(comment));
   });
+
   socialComments.appendChild(fragment);
+  shownComments += nextComments.length;
+  updateCommentCount();
+
+  if (shownComments >= currentComments.length) {
+    commentsLoader.classList.add('hidden');
+  } else {
+    commentsLoader.classList.remove('hidden');
+  }
+};
+
+const onCommentsLoaderClick = () => {
+  renderNextComments();
 };
 
 const onDocumentKeydown = (evt) => {
@@ -53,6 +76,7 @@ function closeBigPicture () {
   document.body.classList.remove('modal-open');
   document.removeEventListener('keydown', onDocumentKeydown);
   closeButton.removeEventListener('click', onCloseButtonClick);
+  commentsLoader.removeEventListener('click', onCommentsLoaderClick);
 }
 
 function openBigPicture (picture) {
@@ -65,14 +89,19 @@ function openBigPicture (picture) {
   commentsCount.textContent = picture.comments.length;
   socialCaption.textContent = picture.description;
 
-  renderComments(picture.comments.map((comment) => ({
+  currentComments = picture.comments.map((comment) => ({
     ...comment,
     avatar: picture.avatar,
-  })));
+  }));
+  shownComments = 0;
+  socialComments.innerHTML = '';
 
-  commentCount.classList.add('hidden');
-  commentsLoader.classList.add('hidden');
+  commentCount.classList.remove('hidden');
+  commentsLoader.classList.remove('hidden');
 
+  renderNextComments();
+
+  commentsLoader.addEventListener('click', onCommentsLoaderClick);
   document.addEventListener('keydown', onDocumentKeydown);
   closeButton.addEventListener('click', onCloseButtonClick);
 }
